@@ -14,6 +14,10 @@ add_library(blake2s
   blake2s.c
   )
 
+target_include_directories(blake2s INTERFACE
+  $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+  )
+
 include(GNUInstallDirs)
 
 install(TARGETS blake2s EXPORT blake2sConfig
@@ -30,16 +34,14 @@ install(
 )
 install(
   EXPORT blake2sConfig
-  DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}
+  NAMESPACE blake2s::
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/blake2s
 )
 export(
   TARGETS blake2s
   FILE blake2sConfig.cmake
 )
 
-if (TESTING)
-  enable_testing()
-  add_executable(blake2s_test test_main.c)
-  add_test(NAME blake2s_test COMMAND blake2s_test)
-  target_link_libraries(blake2s_test blake2s)
-endif ()
+if(TESTING)
+  add_subdirectory(test)
+endif()

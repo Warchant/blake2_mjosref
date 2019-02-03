@@ -3,6 +3,8 @@
 
 #include "blake2s/blake2s.h"
 
+#define _256_bits 32
+
 // Cyclic right rotation.
 
 #ifndef ROTR32
@@ -114,6 +116,25 @@ int blake2s_init(blake2s_ctx *ctx, size_t outlen,
   return 0;
 }
 
+int blake2s_256_init(blake2s_ctx *ctx) {
+  size_t i;
+
+  for (i = 0; i < 8; i++)             // state, "param block"
+    ctx->h[i] = blake2s_iv[i];
+
+  ctx->h[0] ^= 0x01010000 ^ _256_bits;
+
+  ctx->t[0] = 0;                      // input count low word
+  ctx->t[1] = 0;                      // input count high word
+  ctx->c = 0;                         // pointer within buffer
+  ctx->outlen = _256_bits;
+
+  for (i = 0; i < 64; i++)       // zero input block
+    ctx->b[i] = 0;
+
+  return 0;
+}
+
 // Add "inlen" bytes from "in" into the hash.
 
 void blake2s_update(blake2s_ctx *ctx,
@@ -149,8 +170,7 @@ void blake2s_final(blake2s_ctx *ctx, void *out) {
 
   // little endian convert and store
   for (i = 0; i < ctx->outlen; i++) {
-    ((uint8_t *) out)[i] =
-        (ctx->h[i >> 2] >> (8 * (i & 3))) & 0xFF;
+    ((uint8_t *) out)[i] = (ctx->h[i >> 2] >> (8 * (i & 3))) & 0xFF;
   }
 }
 
@@ -168,4 +188,3 @@ int blake2s(void *out, size_t outlen,
 
   return 0;
 }
-

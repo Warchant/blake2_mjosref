@@ -69,11 +69,44 @@ int blake2s_selftest() {
   return 0;
 }
 
+int blake2s_unkeyed_init_test() {
+  blake2s_ctx ctx1, ctx2;
+
+  blake2s_init(&ctx1, 32, NULL, 0);
+  blake2s_256_init(&ctx2);
+
+  const char *in = "hello";
+  int len = 5;
+
+  unsigned char out1[32];
+  unsigned char out2[32];
+
+  blake2s_update(&ctx1, in, len);
+  blake2s_update(&ctx2, in, len);
+
+  blake2s_final(&ctx1, out1);
+  blake2s_final(&ctx2, out2);
+
+  for (int i = 0; i < 32; i++) {
+    if (out1[i] != out2[i]) {
+      return -1; // test failed
+    }
+  }
+
+  return 0; // test succeeded
+}
+
 // Test driver.
 
 int main(int argc, char **argv) {
-  int ret = blake2s_selftest();
+  int ret = 0;
+
+  ret |= blake2s_selftest();
   printf("blake2s_selftest() = %s\n",
+         ret ? "FAIL" : "OK");
+
+  ret |= blake2s_unkeyed_init_test();
+  printf("blake2s_unkeyed_init_test() = %s\n",
          ret ? "FAIL" : "OK");
 
   return ret;
