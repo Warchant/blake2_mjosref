@@ -6,16 +6,12 @@ set(CMAKE_C_STANDARD 11)    # force std=c11
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
-include_directories(
-  ${CMAKE_SOURCE_DIR}/include
-)
-
 add_library(blake2s
   blake2s.c
   )
-
-target_include_directories(blake2s INTERFACE
-  $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+target_include_directories(blake2s PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
   )
 
 include(GNUInstallDirs)
@@ -42,6 +38,6 @@ export(
   FILE blake2sConfig.cmake
 )
 
-if(TESTING)
+if (TESTING)
   add_subdirectory(test)
-endif()
+endif ()
